@@ -57,6 +57,7 @@ plt.show()
 dfStatusNormal['Vibration_sensor_2'].plot.density()
 dfStatusAbnormal['Vibration_sensor_2'].plot.density()
 plt.legend(labels=['Normal', 'Abnormal'])
+plt.xlabel('Vibration Sensor 2')
 plt.show()
 # =============================================================================
 
@@ -81,8 +82,6 @@ for col in data:
         z[col] = ((data[col] - mean)/std)
 print(z.tail())
 # =============================================================================
-
-
 
 
 ##Normalisation
