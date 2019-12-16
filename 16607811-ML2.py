@@ -44,16 +44,9 @@ print("\nCategorical Data: {0}".format(categorical.columns.values))
 # =============================================================================
 sns.boxplot(x="Status", y="Vibration_sensor_1", data=data)
 plt.show()
+
 dfStatusNormal = data.loc[data['Status'] == 'Normal']
 dfStatusAbnormal = data.loc[data['Status'] == 'Abnormal']
-
-#sns.distplot(dfStatusNormal['Vibration_sensor_2'])
-#sns.distplot(dfStatusAbnormal['Vibration_sensor_2'])
-plt.show()
-#data['Vibration_sensor_2'].groupby('Status').plot.density()
-#plt.show()
-#data.boxplot(column='Vibration_sensor_1', by='Status')
-#plt.show()
 dfStatusNormal['Vibration_sensor_2'].plot.density()
 dfStatusAbnormal['Vibration_sensor_2'].plot.density()
 plt.legend(labels=['Normal', 'Abnormal'])
@@ -62,25 +55,17 @@ plt.show()
 # =============================================================================
 
 
-"""
-Normalising Data
-z-normalisation
-z = (x-mean)/std
-"""
-
+#Normalising Data
 # =============================================================================
-#Get numerical data
-numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
-nData = data.select_dtypes(include=numerics)
 z = pd.DataFrame()
 for col in data:
-    if col == "Status":
+    if data[col].dtype == object:
         z[col] = data[col]
     else:
         mean = data[col].mean()
         std = data[col].std()
         z[col] = ((data[col] - mean)/std)
-print(z.tail())
+print(z.describe())
 # =============================================================================
 
 
