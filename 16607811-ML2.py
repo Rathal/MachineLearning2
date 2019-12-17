@@ -68,7 +68,6 @@ for col in data:
 
 #Converting Normal to 1, Abnormal to 0
 z = z.replace({'Normal': 1, 'Abnormal': 0})
-#print(z.describe())
 # =============================================================================
 
 #import sklearn
@@ -97,12 +96,12 @@ xTrain, xTest, yTrain, yTest = train_test_split(X, Y, test_size=0.1)
 
 #ANN
 # =============================================================================
-def ANN_fit(x, y, epochs):
-    mlp = MLPClassifier(hidden_layer_sizes=(500, 500), activation='logistic', max_iter=epochs)
-    mlp.fit(xTrain, yTrain.ravel())
-    return mlp
-def ANN_predict(mlp, x):
-    prediction = mlp.predict(x)
+def ANN_fit(x, y, neurons, epochs):
+    ann = MLPClassifier(hidden_layer_sizes=(neurons, neurons), activation='logistic', max_iter=epochs)
+    ann.fit(xTrain, yTrain.ravel())
+    return ann
+def ANN_predict(ann, x):
+    prediction = ann.predict(x)
     return prediction
 
 
@@ -110,9 +109,9 @@ epochs = [1, 25, 50, 100, 250, 500, 1000, 5000] #1, 25, 50, 100, 250, 500
 accuracyANN = []
 for e in epochs:
     print("Epoch: " + str(e))
-    mlp = ANN_fit(xTrain, yTrain, e)
+    ann = ANN_fit(xTrain, yTrain, 500, e)
 #    predictTest = ANN_predict(mlp, xTest)
-    accuracyANN.append(mlp.score(xTest, yTest))
+    accuracyANN.append(ann.score(xTest, yTest))
 
 plt.plot(epochs,accuracyANN)
 plt.title("ANN Accuracy")
