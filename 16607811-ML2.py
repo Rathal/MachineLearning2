@@ -9,6 +9,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from warnings import filterwarnings
+filterwarnings('ignore')
+
 #Import Data
 data = pd.DataFrame(data = pd.read_csv("dataset.csv"))
 
@@ -105,7 +108,7 @@ def ANN_predict(ann, x):
     return prediction
 
 
-epochs = [1, 25, 50, 100, 250, 500, 1000, 5000] #1, 25, 50, 100, 250, 500
+epochs = [1, 25, 50, 100, 250, 500, 1000, 5000] #1, 25, 50, 100, 250, 500, 1000, 5000
 accuracyANN = []
 for e in epochs:
     print("Epoch: " + str(e))
@@ -123,33 +126,101 @@ plt.show()
 
 #Random Forest
 # =============================================================================
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier
 
-trees = [1, 10, 50, 100, 1000, 5000]
-leaf = [5, 50]
+trees = [1, 10, 50, 100, 1000, 5000] #1, 10, 50, 100, 1000, 5000
+leaf = [5, 50] #5, 50
 accuracyTree = []
+
 for l in leaf:
     for tree in trees:
         print("Leaf {0}: Tree {1}".format(l, tree))
-        regressor = RandomForestRegressor(n_estimators=tree, min_samples_leaf=l)
-        regressor.fit(xTrain, yTrain.ravel())
-        accuracyTree.append(regressor.score(xTest, yTest.ravel()))
-
-#print(accuracyTree)
+        rfc = RandomForestClassifier(n_estimators=tree, min_samples_leaf=l)
+        rfc.fit(xTrain, yTrain.ravel())
+        accuracyTree.append(rfc.score(xTest, yTest.ravel()))
+        
 half = len(accuracyTree)//2
 accLeaf5 = accuracyTree[:half]
 accLeaf50 = accuracyTree[half:]
-#print(accLeaf50)
 
 plt.plot(trees,accLeaf5)
 plt.plot(trees,accLeaf50)
-plt.xscale('log')
+#plt.xscale('log')
 plt.xlabel('Trees')
 plt.ylabel('Accuracy')
 plt.legend(labels=['Leaf = 5', 'Leaf = 50'])
 plt.show()
 # =============================================================================
 
+#K-Fold, K = 10
+# =============================================================================
+from sklearn.model_selection import KFold
+
+neurons = [50, 500, 1000] #50, 500, 1000
+trees = [20, 500, 10000] #20, 500, 10000
+
+k = 10
+kFold = KFold(k, True)
+
+#ANN
+## ============================================================================
+results = []
+for neuron in neurons:
+    #For Each Fold
+    print("Fold")
+    kFolds = kFold.split(z)
+    intraResults = []
+    for fold in kFolds:
+        #Fold the data
+        train = z.iloc[fold[0]]
+        test = z.iloc[fold[1]]
+        
+        #Split data into X and Ys per fold
+        yTrain = train[outputCol].values
+        yTest = test[outputCol].values
+        xTrain = train[inputCols].values
+        xTest = test[inputCols].values
+        
+        print("Neurons: {0}".format(neuron))
+        ann = ANN_fit(xTrain, yTrain, neuron, 500)
+        intraResults.append(ann.score(xTest,yTest))
+    results.append(sum(intraResults)/len(intraResults))
+    print(results)
+plt.plot(neurons, results)
+plt.title('10-Fold ANN')
+plt.ylabel('Accuracy')
+plt.xlabel('Neurons')
+plt.show()
+
+#RFC
+## ============================================================================
+results = []
+for tree in trees:
+    print('Fold')
+    kFolds = kFold.split(z)
+    intraResults = []
+    for fold in kFolds:
+        train = z.iloc[fold[0]]
+        test = z.iloc[fold[1]]
+        
+        #Split data into X and Ys per fold
+        yTrain = train[outputCol].values
+        yTest = test[outputCol].values
+        xTrain = train[inputCols].values
+        xTest = test[inputCols].values
+        
+        print("Trees: {0}".format(tree))
+        rfc = RandomForestClassifier(n_estimators=tree, min_samples_leaf=5)
+        rfc.fit(xTrain, yTrain.ravel())
+        intraResults.append(rfc.score(xTest, yTest.ravel()))
+    results.append(sum(intraResults)/len(intraResults))
+    print(results)
+plt.plot(trees, results)
+plt.title('10-Fold RFC')
+plt.ylabel('Accuracy')
+plt.xlabel('Trees')
+plt.show()
+# =============================================================================
 
 #predict_train = mlp.predict(xTrain)
 #predict_test = mlp.predict(xTest)
